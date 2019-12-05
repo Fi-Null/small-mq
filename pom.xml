@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.small.mq</groupId>
+    <artifactId>small-mq</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0-SNAPSHOT</version>
+
+    <modules>
+        <module>small-mq-admin</module>
+        <module>small-mq-client</module>
+        <module>small-mq-demo</module>
+    </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.test.skip>true</maven.test.skip>
+
+        <spring.version>5.2.1.RELEASE</spring.version>
+
+        <spring-boot.version>2.2.1.RELEASE</spring-boot.version>
+        <mybatis-spring-boot-starter.version>1.3.3</mybatis-spring-boot-starter.version>
+        <mysql-connector-java.version>5.1.47</mysql-connector-java.version>
+
+    </properties>
+</project>
