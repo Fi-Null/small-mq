@@ -1,10 +1,10 @@
 package com.small.mq.client.consumer;
 
-import com.small.mq.client.consumer.annotation.SmallMqConsumer;
+import com.small.mq.client.consumer.annotation.Consumer;
 import com.small.mq.client.consumer.registry.ConsumerRegistryHelper;
 import com.small.mq.client.factory.SmallMqClientFactory;
+import com.small.mq.client.message.Message;
 import com.small.mq.client.message.MessageStatus;
-import com.small.mq.client.message.SmallMqMessage;
 import com.small.mq.client.util.IpUtil;
 import com.small.mq.client.util.LogHelper;
 import com.small.mq.client.util.ThrowableUtil;
@@ -28,21 +28,21 @@ public class ConsumerThread extends Thread {
 
     private final static Logger logger = LoggerFactory.getLogger(ConsumerThread.class);
 
-    private SmallMqConsumerListener consumerHandler;
+    private MessageListener consumerHandler;
 
-    private SmallMqConsumer mqConsumer;
+    private Consumer mqConsumer;
 
     private String uuid;
 
-    public ConsumerThread(SmallMqConsumerListener consumerHandler) {
+    public ConsumerThread(MessageListener consumerHandler) {
         this.consumerHandler = consumerHandler;
 
-        this.mqConsumer = consumerHandler.getClass().getAnnotation(SmallMqConsumer.class);
+        this.mqConsumer = consumerHandler.getClass().getAnnotation(Consumer.class);
 
         this.uuid = UUID.randomUUID().toString().replaceAll("-", "");
     }
 
-    public SmallMqConsumer getMqConsumer() {
+    public Consumer getMqConsumer() {
         return mqConsumer;
     }
 
@@ -64,7 +64,7 @@ public class ConsumerThread extends Thread {
                 if (activeInfo != null) {
 
                     // pullNewMessage
-                    List<SmallMqMessage> messageList = SmallMqClientFactory.getBroker().pullNewMessage(mqConsumer.topic(), mqConsumer.group(), activeInfo.rank, activeInfo.total, 100);
+                    List<Message> messageList = SmallMqClientFactory.getBroker().pullNewMessage(mqConsumer.topic(), mqConsumer.group(), activeInfo.rank, activeInfo.total, 100);
                     if (messageList != null && messageList.size() > 0) {
 
                         // reset wait time
@@ -74,7 +74,7 @@ public class ConsumerThread extends Thread {
                             waitTim = 1;    // no-transaction message status delay updated by callback, may be repeat, need wail for callback
                         }
 
-                        for (final SmallMqMessage msg : messageList) {
+                        for (final Message msg : messageList) {
 
                             // check active twice
                             ConsumerRegistryHelper.ActiveInfo newActiveInfo = SmallMqClientFactory.getConsumerRegistryHelper().isActice(this);
@@ -96,37 +96,37 @@ public class ConsumerThread extends Thread {
                             }
 
                             // consume message
-                            SmallMqResult smallMqResult = null;
+                            Result result = null;
                             try {
 
                                 if (msg.getTimeout() > 0) {
                                     // limit timeout
                                     Thread futureThread = null;
                                     try {
-                                        FutureTask<SmallMqResult> futureTask = new FutureTask<>(
+                                        FutureTask<Result> futureTask = new FutureTask<>(
                                                 () -> consumerHandler.consume(msg.getData()));
                                         futureThread = new Thread(futureTask);
                                         futureThread.start();
 
-                                        smallMqResult = futureTask.get(msg.getTimeout(), TimeUnit.SECONDS);
+                                        result = futureTask.get(msg.getTimeout(), TimeUnit.SECONDS);
                                     } catch (TimeoutException e) {
                                         logger.error(e.getMessage(), e);
-                                        smallMqResult = new SmallMqResult(SmallMqResult.FAIL_CODE, "Timeout:" + e.getMessage());
+                                        result = new Result(Result.FAIL_CODE, "Timeout:" + e.getMessage());
                                     } finally {
                                         futureThread.interrupt();
                                     }
                                 } else {
                                     // direct run
-                                    smallMqResult = consumerHandler.consume(msg.getData());
+                                    result = consumerHandler.consume(msg.getData());
                                 }
 
-                                if (smallMqResult == null) {
-                                    smallMqResult = SmallMqResult.FAIL;
+                                if (result == null) {
+                                    result = Result.FAIL;
                                 }
                             } catch (Exception e) {
                                 logger.error(e.getMessage(), e);
                                 String errorMsg = ThrowableUtil.toString(e);
-                                smallMqResult = new SmallMqResult(SmallMqResult.FAIL_CODE, errorMsg);
+                                result = new Result(Result.FAIL_CODE, errorMsg);
                             }
 
                             // log
@@ -134,21 +134,21 @@ public class ConsumerThread extends Thread {
                             if (mqConsumer.transaction()) {
                                 appendLog_consume = LogHelper.makeLog(
                                         "消费消息",
-                                        ("消费结果=" + (smallMqResult.isSuccess() ? "成功" : "失败")
-                                                + "；<br>消费日志=" + smallMqResult.getLog())
+                                        ("消费结果=" + (result.isSuccess() ? "成功" : "失败")
+                                                + "；<br>消费日志=" + result.getLog())
                                 );
                             } else {
                                 appendLog_consume = LogHelper.makeLog(
                                         "消费消息",
-                                        ("消费结果=" + (smallMqResult.isSuccess() ? "成功" : "失败")
+                                        ("消费结果=" + (result.isSuccess() ? "成功" : "失败")
                                                 + "；<br>消费者信息=" + activeInfo.toString()
                                                 + "；<br>消费者IP=" + IpUtil.getIp()
-                                                + "；<br>消费日志=" + smallMqResult.getLog())
+                                                + "；<br>消费日志=" + result.getLog())
                                 );
                             }
 
                             // callback
-                            msg.setStatus(smallMqResult.isSuccess() ? MessageStatus.SUCCESS.name() : MessageStatus.FAIL.name());
+                            msg.setStatus(result.isSuccess() ? MessageStatus.SUCCESS.name() : MessageStatus.FAIL.name());
                             msg.setLog(appendLog_consume);
                             SmallMqClientFactory.callbackMessage(msg);
 

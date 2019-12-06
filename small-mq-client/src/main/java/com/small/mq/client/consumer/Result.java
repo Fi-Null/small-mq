@@ -7,29 +7,29 @@ package com.small.mq.client.consumer;
  * @description
  * @createDate 12/5/19 6:09 PM
  */
-public class SmallMqResult {
+public class Result {
 
     // code
     public static final String SUCCESS_CODE = "SUCCESS";
     public static final String FAIL_CODE = "FAIL";   // default
 
     // result
-    public static final SmallMqResult SUCCESS = new SmallMqResult(SUCCESS_CODE);
-    public static final SmallMqResult FAIL = new SmallMqResult(FAIL_CODE);
+    public static final Result SUCCESS = new Result(SUCCESS_CODE);
+    public static final Result FAIL = new Result(FAIL_CODE);
 
     // field
     public String code;
     public String log;
 
     // construct
-    public SmallMqResult() {
+    public Result() {
     }
 
-    public SmallMqResult(String code) {
+    public Result(String code) {
         this.code = code;
     }
 
-    public SmallMqResult(String code, String log) {
+    public Result(String code, String log) {
         this.code = code;
         this.log = log;
     }

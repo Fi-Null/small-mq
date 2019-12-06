@@ -12,7 +12,7 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-public @interface SmallMqConsumer {
+public @interface Consumer {
 
     String DEFAULT_GROUP = "DEFAULT";   // default group
 

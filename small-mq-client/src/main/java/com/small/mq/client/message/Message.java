@@ -10,7 +10,7 @@ import java.util.Date;
  * @description
  * @createDate 12/5/19 3:17 PM
  */
-public class SmallMqMessage implements Serializable {
+public class Message implements Serializable {
     private static final long serialVersionUID = 42L;
 
     private long id;                // 消息ID,
@@ -26,28 +26,28 @@ public class SmallMqMessage implements Serializable {
     private String log;                // 流转日志
 
 
-    public SmallMqMessage() {
+    public Message() {
     }
 
-    public SmallMqMessage(String topic, String data) {
+    public Message(String topic, String data) {
         this.topic = topic;
         this.data = data;
     }
 
-    public SmallMqMessage(String topic, String data, Date effectTime) {
+    public Message(String topic, String data, Date effectTime) {
         this.topic = topic;
         this.data = data;
         this.effectTime = effectTime;
     }
 
-    public SmallMqMessage(String topic, String data, long shardingId) {
+    public Message(String topic, String data, long shardingId) {
         this.topic = topic;
         this.data = data;
         this.shardingId = shardingId;
     }
 
     // for clone
-    public SmallMqMessage(SmallMqMessage SmallMqMessage) {
+    public Message(Message SmallMqMessage) {
         this.id = SmallMqMessage.id;
         this.topic = SmallMqMessage.topic;
         this.group = SmallMqMessage.group;
@@ -152,7 +152,7 @@ public class SmallMqMessage implements Serializable {
 
     @Override
     public String toString() {
-        return "SmallMqMessage{" +
+        return "Message{" +
                 "id=" + id +
                 ", topic='" + topic + '\'' +
                 ", group='" + group + '\'' +

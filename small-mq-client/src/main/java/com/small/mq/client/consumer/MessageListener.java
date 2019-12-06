@@ -1,6 +1,6 @@
 package com.small.mq.client.consumer;
 
-public interface SmallMqConsumerListener {
+public interface MessageListener {
     /**
      * consume message
      *
@@ -8,5 +8,5 @@ public interface SmallMqConsumerListener {
      * @return
      * @throws Exception
      */
-    public SmallMqResult consume(String data) throws Exception;
+    public Result consume(String data) throws Exception;
 }

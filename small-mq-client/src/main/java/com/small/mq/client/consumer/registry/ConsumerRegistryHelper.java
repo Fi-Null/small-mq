@@ -2,6 +2,7 @@ package com.small.mq.client.consumer.registry;
 
 import com.small.mq.client.consumer.ConsumerThread;
 import com.small.mq.client.consumer.TopicUtil;
+import com.small.mq.client.consumer.annotation.Consumer;
 import com.small.registry.client.model.RegistryDataParamVO;
 import com.small.rpc.registry.smallregistry.SmallRegistryServiceRegistry;
 
@@ -47,6 +48,46 @@ public class ConsumerRegistryHelper {
         serviceRegistry.getRegistryClient().discovery(registryParamKeyList);
     }
 
+    /**
+     * consumer registry remove
+     */
+    public void removeConsumer(List<ConsumerThread> consumerThreadList) {
+        List<RegistryDataParamVO> registryParamList = new ArrayList<>();
+        for (ConsumerThread consumerThread : consumerThreadList) {
+            String registryKey = TopicUtil.makeRegistryKey(consumerThread.getMqConsumer().topic());
+            String registryVal = TopicUtil.makeRegistryVal(consumerThread.getMqConsumer().group(), consumerThread.getUuid());
+            registryParamList.add(new RegistryDataParamVO(registryKey, registryVal));
+        }
+
+        serviceRegistry.getRegistryClient().remove(registryParamList);
+    }
+
+    /**
+     * get total group list
+     */
+    public Set<String> getTotalGroupList(String topic) {
+        // init data
+        String registryKey = TopicUtil.makeRegistryKey(topic);
+
+
+        // load all consumer, find all groups
+        Set<String> groupSet = new HashSet<>();
+        TreeSet<String> onlineConsumerRegistryValList = serviceRegistry.discovery(registryKey);
+
+        if (onlineConsumerRegistryValList != null && onlineConsumerRegistryValList.size() > 0) {
+            for (String onlineConsumerRegistryValItem : onlineConsumerRegistryValList) {
+                String groupItem = TopicUtil.parseGroupFromRegistryVal(onlineConsumerRegistryValItem);
+                if (groupItem != null && groupItem.length() > 1) {
+                    groupSet.add(groupItem);
+                }
+            }
+        }
+
+        if (!groupSet.contains(Consumer.DEFAULT_GROUP)) {
+            groupSet.add(Consumer.DEFAULT_GROUP);
+        }
+        return groupSet;
+    }
 
     /**
      * isActice

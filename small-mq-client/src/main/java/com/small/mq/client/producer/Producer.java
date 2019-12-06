@@ -1,13 +1,14 @@
 package com.small.mq.client.producer;
 
-import com.small.mq.client.consumer.annotation.SmallMqConsumer;
+import com.small.mq.client.consumer.annotation.Consumer;
 import com.small.mq.client.factory.SmallMqClientFactory;
+import com.small.mq.client.message.Message;
 import com.small.mq.client.message.MessageStatus;
-import com.small.mq.client.message.SmallMqMessage;
 import com.small.mq.client.util.IpUtil;
 import com.small.mq.client.util.LogHelper;
 
 import java.util.Date;
+import java.util.Set;
 
 /**
  * @author null
@@ -16,7 +17,7 @@ import java.util.Date;
  * @description
  * @createDate 12/5/19 3:24 PM
  */
-public class SmallMqProducer {
+public class Producer {
 
     // ---------------------- valid message ----------------------
 
@@ -26,9 +27,9 @@ public class SmallMqProducer {
      * @param mqMessage
      * @return
      */
-    public static void validMessage(SmallMqMessage mqMessage) {
+    public static void validMessage(Message mqMessage) {
         if (mqMessage == null) {
-            throw new IllegalArgumentException("small-mq, SmallMqMessage can not be null.");
+            throw new IllegalArgumentException("small-mq, Message can not be null.");
         }
 
         // topic
@@ -41,7 +42,7 @@ public class SmallMqProducer {
 
         // group
         if (mqMessage.getGroup() == null || mqMessage.getGroup().trim().length() == 0) {
-            mqMessage.setGroup(SmallMqConsumer.DEFAULT_GROUP);
+            mqMessage.setGroup(Consumer.DEFAULT_GROUP);
         }
         if (!(mqMessage.getGroup().length() >= 4 && mqMessage.getGroup().length() <= 255)) {
             throw new IllegalArgumentException("small-mq, group length invalid[4~255].");
@@ -89,7 +90,7 @@ public class SmallMqProducer {
     /**
      * produce produce
      */
-    public static void produce(SmallMqMessage mqMessage, boolean async) {
+    public static void produce(Message mqMessage, boolean async) {
         // valid
         validMessage(mqMessage);
 
@@ -97,7 +98,7 @@ public class SmallMqProducer {
         SmallMqClientFactory.addMessages(mqMessage, async);
     }
 
-    public static void produce(SmallMqMessage mqMessage) {
+    public static void produce(Message mqMessage) {
         produce(mqMessage, true);
     }
 
@@ -107,26 +108,26 @@ public class SmallMqProducer {
     /**
      * broadcast produce
      */
-    public static void broadcast(SmallMqMessage mqMessage, boolean async) {
+    public static void broadcast(Message mqMessage, boolean async) {
         // valid
         validMessage(mqMessage);
 
         // find online group
-//        Set<String> groupList = SmallMqClientFactory.getConsumerRegistryHelper().getTotalGroupList(mqMessage.getTopic());
-//
-//        // broud total online group
-//        for (String group : groupList) {
-//
-//            // clone msg
-//            SmallMqMessage cloneMsg = new SmallMqMessage(mqMessage);
-//            cloneMsg.setGroup(group);
-//
-//            // produce clone msg
-//            produce(cloneMsg, true);
-//        }
+        Set<String> groupList = SmallMqClientFactory.getConsumerRegistryHelper().getTotalGroupList(mqMessage.getTopic());
+
+        // broud total online group
+        for (String group : groupList) {
+
+            // clone msg
+            Message cloneMsg = new Message(mqMessage);
+            cloneMsg.setGroup(group);
+
+            // produce clone msg
+            produce(cloneMsg, true);
+        }
     }
 
-    public static void broadcast(SmallMqMessage mqMessage) {
+    public static void broadcast(Message mqMessage) {
         broadcast(mqMessage, true);
     }
 
