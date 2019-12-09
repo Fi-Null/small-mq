@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.small.mq.admin.dao.MqTopicDao">
+
+    <resultMap id="mqTopic" type="com.small.mq.admin.model.MqTopic">
+        <result column="topic" property="topic"/>
+        <result column="bizId" property="bizId"/>
+        <result column="author" property="author"/>
+        <result column="alarmEmails" property="alarmEmails"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+		t.`topic`,
+		t.`bizId`,
+		t.`author`,
+		t.`alarmEmails`
+	</sql>
+
+    <select id="pageList" parameterType="java.util.HashMap" resultMap="mqTopic">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM mq_topic AS t
+        <trim prefix="WHERE" prefixOverrides="AND | OR">
+            <if test="bizId gte 0">
+                AND t.bizId = #{bizId}
+            </if>
+            <if test="topic != null and topic != ''">
+                AND t.topic like CONCAT(CONCAT('%', #{topic}), '%')
+            </if>
+        </trim>
+        ORDER BY t.topic ASC
+        LIMIT #{offset}, #{pagesize}
+    </select>
+
+    <select id="pageListCount" parameterType="java.util.HashMap" resultType="int">
+        SELECT count(1)
+        FROM mq_topic AS t
+        <trim prefix="WHERE" prefixOverrides="AND | OR">
+            <if test="bizId gte 0">
+                AND t.bizId = #{bizId}
+            </if>
+            <if test="topic != null and topic != ''">
+                AND t.topic like CONCAT(CONCAT('%', #{topic}), '%')
+            </if>
+        </trim>
+    </select>
+
+    <select id="load" parameterType="java.util.HashMap" resultMap="mqTopic">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM mq_topic AS t
+        WHERE t.`topic` = #{topic}
+    </select>
+
+    <insert id="add" parameterType="com.small.mq.admin.model.MqTopic">
+		INSERT INTO mq_topic (
+			`topic`,
+			`bizId`,
+			`author`,
+			`alarmEmails`
+		) VALUES
+		(
+			#{mqTopic.topic},
+			#{mqTopic.bizId},
+			#{mqTopic.author},
+			#{mqTopic.alarmEmails}
+		)
+	</insert>
+
+    <update id="update" parameterType="com.small.mq.admin.model.MqTopic">
+		UPDATE mq_topic AS t
+		SET
+			t.`bizId` = #{mqTopic.bizId},
+			t.`author` = #{mqTopic.author},
+			t.`alarmEmails` = #{mqTopic.alarmEmails}
+		WHERE t.`topic` = #{mqTopic.topic}
+	</update>
+
+    <delete id="delete" parameterType="java.util.HashMap">
+		DELETE FROM mq_topic
+		WHERE topic = #{topic}
+	</delete>
+
+    <select id="findAlarmByTopic" parameterType="java.util.HashMap" resultMap="mqTopic">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM mq_topic AS t
+        where LENGTH(t.alarmEmails) <![CDATA[ > ]]> 0
+        and t.topic in
+        <foreach collection="topics" item="topicItem" index="index" separator="," open="(" close=")">
+            #{topicItem}
+        </foreach>
+    </select>
+</mapper>
