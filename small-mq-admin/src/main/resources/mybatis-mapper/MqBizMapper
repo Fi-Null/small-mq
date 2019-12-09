@@ -30,7 +30,7 @@
     </select>
 
     <!-- "useGeneratedKeys" cannot work with "@Param" -->
-    <insert id="add" parameterType="com.xxl.mq.admin.core.model.mqBiz" useGeneratedKeys="true" keyProperty="id">
+    <insert id="add" parameterType="com.small.mq.admin.model.MqBiz" useGeneratedKeys="true" keyProperty="id">
 		INSERT INTO mq_biz (
 			`bizName`,
 			`order`

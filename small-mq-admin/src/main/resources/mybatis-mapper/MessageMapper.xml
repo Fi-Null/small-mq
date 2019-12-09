@@ -197,7 +197,7 @@
 		select distinct topic
 		from message
 		where topic not in (
-				select topic from xxl_mq_topic
+				select topic from mq_topic
 			)
 	</select>
 

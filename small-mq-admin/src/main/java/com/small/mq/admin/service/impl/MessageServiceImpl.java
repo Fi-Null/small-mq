@@ -29,9 +29,9 @@ public class MessageServiceImpl implements MessageService {
     @Resource
     private MessageDao MessageDao;
     @Resource
-    private MqBizService xxlMqBizService;
+    private MqBizService mqBizService;
     @Resource
-    private MqTopicDao xxlMqTopicDao;
+    private MqTopicDao mqTopicDao;
 
     @Override
     public Map<String, Object> pageList(int offset, int pagesize, String topic, String status, Date addTimeStart, Date addTimeEnd) {
@@ -81,10 +81,10 @@ public class MessageServiceImpl implements MessageService {
 
             // topic
             if (mqMessage.getTopic() == null || mqMessage.getTopic().trim().length() == 0) {
-                return new Result<String>(Result.FAIL_CODE, "xxl-mq, topic empty.");
+                return new Result<String>(Result.FAIL_CODE, "small-mq, topic empty.");
             }
             if (!(mqMessage.getTopic().length() >= 4 && mqMessage.getTopic().length() <= 255)) {
-                return new Result<String>(Result.FAIL_CODE, "xxl-mq, topic length invalid[4~255].");
+                return new Result<String>(Result.FAIL_CODE, "small-mq, topic length invalid[4~255].");
             }
 
             // group
@@ -92,7 +92,7 @@ public class MessageServiceImpl implements MessageService {
                 mqMessage.setGroup(Consumer.DEFAULT_GROUP);
             }
             if (!(mqMessage.getGroup().length() >= 4 && mqMessage.getGroup().length() <= 255)) {
-                return new Result<String>(Result.FAIL_CODE, "xxl-mq, group length invalid[4~255].");
+                return new Result<String>(Result.FAIL_CODE, "small-mq, group length invalid[4~255].");
             }
         }
 
@@ -101,7 +101,7 @@ public class MessageServiceImpl implements MessageService {
             mqMessage.setData("");
         }
         if (mqMessage.getData().length() > 20000) {
-            throw new IllegalArgumentException("xxl-mq, data length invalid[0~60000].");
+            throw new IllegalArgumentException("small-mq, data length invalid[0~60000].");
         }
 
         // status
@@ -160,9 +160,9 @@ public class MessageServiceImpl implements MessageService {
         int topicCount = 0;
         int messageCount = 0;
 
-        List<MqBiz> bizList = xxlMqBizService.findAll();
+        List<MqBiz> bizList = mqBizService.findAll();
         bizCount = bizList != null ? bizList.size() : 0;
-        topicCount = xxlMqTopicDao.pageListCount(0, 1, -1, null);
+        topicCount = mqTopicDao.pageListCount(0, 1, -1, null);
         messageCount = MessageDao.pageListCount(0, 1, null, null, null, null);
 
         Map<String, Object> dashboardMap = new HashMap<>();
