@@ -7,7 +7,7 @@ import com.small.mq.client.message.Message;
 import com.small.mq.client.message.MessageStatus;
 import com.small.mq.client.util.IpUtil;
 import com.small.mq.client.util.ThreadPoolUtil;
-import com.small.rpc.registry.smallregistry.SmallRegistryServiceRegistry;
+import com.small.rpc.registry.smallregistry.SmallRegistry;
 import com.small.rpc.remoting.net.netty.server.NettyServer;
 import com.small.rpc.remoting.provider.RpcProviderFactory;
 import com.small.rpc.serialize.hessian.HessianSerializer;
@@ -146,10 +146,10 @@ public class BrokerServer implements Broker, InitializingBean, DisposableBean {
         providerFactory.setIp(ip);
         providerFactory.setPort(port);
         providerFactory.setAccessToken(null);
-        providerFactory.setServiceRegistry(SmallRegistryServiceRegistry.class);
+        providerFactory.setServiceRegistry(SmallRegistry.class);
         providerFactory.setServiceRegistryParam(new HashMap<String, String>() {{
-            put(SmallRegistryServiceRegistry.SMALL_REGISTRY_ADDRESS, registryAddress);
-            put(SmallRegistryServiceRegistry.ACCESS_TOKEN, accessToken);
+            put(SmallRegistry.SMALL_REGISTRY_ADDRESS, registryAddress);
+            put(SmallRegistry.ACCESS_TOKEN, accessToken);
         }});
 
         // add services
